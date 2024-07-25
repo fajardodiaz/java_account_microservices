@@ -15,7 +15,11 @@ public interface IAccountsService {
      * @return Account details based on a given email address
      */
     CustomerDto fetchAccountByEmail(String email);
-    
-    
-//    CustomerDto fetchAccountByMobileNumber(String mobileNumber);
+
+    /**
+     *
+     * @param mobileNumber - Input email
+     * @return Account details based on a given mobile number
+     */
+    CustomerDto fetchAccountByMobileNumber(String mobileNumber);
 }

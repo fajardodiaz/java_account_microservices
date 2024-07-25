@@ -27,11 +27,16 @@ public class AccountsController {
     @GetMapping("/fetch")
     public ResponseEntity<CustomerDto> fetchAccountDetailsByEmail(@RequestParam String email){
         CustomerDto customerDto = iAccountsService.fetchAccountByEmail(email);
-        return ResponseEntity.status(HttpStatus.OK).body(customerDto);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(customerDto);
     }
     
-//    @GetMapping("/fetch/mobile")
-//    public ResponseEntity<ResponseDto> fetchAccountDetailsByMobileNumber(@RequestParam String mobile){
-//        
-//    }
+    @GetMapping("/fetch/mobile")
+    public ResponseEntity<CustomerDto> fetchAccountDetailsByMobileNumber(@RequestParam String mobile){
+        CustomerDto customerDto = iAccountsService.fetchAccountByMobileNumber(mobile);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(customerDto);
+    }
 }
