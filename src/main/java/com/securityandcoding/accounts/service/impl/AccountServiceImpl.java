@@ -1,10 +1,13 @@
 package com.securityandcoding.accounts.service.impl;
 
 import com.securityandcoding.accounts.constants.AccountsConstants;
+import com.securityandcoding.accounts.dto.AccountsDto;
 import com.securityandcoding.accounts.dto.CustomerDto;
 import com.securityandcoding.accounts.entity.Accounts;
 import com.securityandcoding.accounts.entity.Customer;
 import com.securityandcoding.accounts.exception.CustomerAlreadyExistsException;
+import com.securityandcoding.accounts.exception.ResourceNotFoundException;
+import com.securityandcoding.accounts.mapper.AccountsMapper;
 import com.securityandcoding.accounts.mapper.CustomerMapper;
 import com.securityandcoding.accounts.repository.AccountsRepository;
 import com.securityandcoding.accounts.repository.CustomerRepository;
@@ -33,10 +36,10 @@ public class AccountServiceImpl implements IAccountsService {
         Customer customer = CustomerMapper.mapToCustomer(customerDto, new Customer());
         
         // Validations
-        Optional<Customer> optionalCustomer = customerRepository.findByMobileNumber(customerDto.getMobileNumber());
+        Optional<Customer> optionalCustomerByMobileNumber = customerRepository.findByMobileNumber(customerDto.getMobileNumber());
         Optional<Customer> optionalCustomerByEmail = customerRepository.findByEmail(customerDto.getEmail());
         // Validate if the mobile number is registered
-        if (optionalCustomer.isPresent()) {
+        if (optionalCustomerByMobileNumber.isPresent()) {
             throw new CustomerAlreadyExistsException("Customer already registered with given mobile number " + customerDto.getMobileNumber());
         }
         // Validate if the email is registered
@@ -48,7 +51,27 @@ public class AccountServiceImpl implements IAccountsService {
         Customer savedCustomer = customerRepository.save(customer);
         accountsRepository.save(createNewAccount(savedCustomer));
     }
-    
+
+    @Override
+    public CustomerDto fetchAccountByEmail(String email) {
+        Customer customer = customerRepository.findByEmail(email).orElseThrow(
+                ()-> new ResourceNotFoundException("Customer", "email", email )
+        );
+        
+        Accounts accounts = accountsRepository.findByCustomerId(customer.getCustomerId()).orElseThrow(
+                ()-> new ResourceNotFoundException("Account","customerId", customer.getCustomerId().toString())
+        );
+        
+        CustomerDto customerDto = CustomerMapper.mapToCustomerDto(customer, new CustomerDto());
+        customerDto.setAccountsDto(AccountsMapper.mapToAccountsDto(accounts, new AccountsDto()));
+        return customerDto;
+    }
+
+//    @Override
+//    public CustomerDto fetchAccountByMobileNumber(String mobileNumber) {
+//        return null;
+//    }
+
     private Accounts createNewAccount(Customer customer) {
         Accounts newAccount = new Accounts();
         newAccount.setCustomerId(customer.getCustomerId());
@@ -56,7 +79,7 @@ public class AccountServiceImpl implements IAccountsService {
         
         newAccount.setAccountNumber(randomAccNumber);
         newAccount.setAccountType(AccountsConstants.SAVINGS);
-        newAccount.setBranchAddress(AccountsConstants.ADDRESS);
+        newAccount.setBranchAddress(AccountsConstants.ADDRESS); 
         newAccount.setCreatedAt(LocalDateTime.now());
         newAccount.setCreatedBy("Anonymous");
         return newAccount;
