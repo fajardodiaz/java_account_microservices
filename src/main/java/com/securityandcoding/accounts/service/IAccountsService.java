@@ -7,7 +7,5 @@ public interface IAccountsService {
      * 
      * @param customerDto
      */
-    void createAccount(CustomerDto customerDto){
-        
-    }
+    void createAccount(CustomerDto customerDto);
 }
