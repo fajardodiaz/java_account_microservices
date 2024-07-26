@@ -1,7 +1,11 @@
-FROM amazoncorretto:21-alpine3.17
-
+FROM maven:3.9.8 as build
 WORKDIR /app
+COPY . .
+RUN mvn dependency:resolve
+COPY src ./src
+RUN mvn clean package
 
-COPY target/accounts-0.0.1-SNAPSHOT.jar app.jar
-
+FROM amazoncorretto:21-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar ./app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
